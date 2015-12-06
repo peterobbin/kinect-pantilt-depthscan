@@ -24,6 +24,24 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
     
+    
+    
+    int bufferSize;
+    int imgW;
+    int imgH;
+    
+    
     ofxKinect kinect;
-		
+    deque<ofPixels> frames;
+    deque<ofPixels> depthFrames;
+    
+    ofPixels colorImgPixels;
+    ofImage colorImg;
+    
+    ofPixels depthImgPixels;
+    ofImage depthImg;
+    
+    
+    ofColor getPixelColor(int x, int y);
+    ofColor getPixelDepth(int x, int y);
 };
