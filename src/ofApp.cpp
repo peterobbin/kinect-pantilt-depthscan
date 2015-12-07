@@ -13,8 +13,14 @@ void ofApp::setup(){
     // set variables
     bufferSize = 50;
     
+    
     imgW = kinect.getWidth();
     imgH = kinect.getHeight();
+    
+    
+    //set gui
+    gui.setup();
+    gui.add(kinectTiltAngle.set("Kinect Tilt Angle", 0, 0, 30));
     
 
 }
@@ -74,6 +80,8 @@ void ofApp::update(){
         
     }
     
+    kinect.setCameraTiltAngle(kinectTiltAngle);
+    
     
 }
 
@@ -93,6 +101,8 @@ void ofApp::draw(){
     if (depthImg.isAllocated()) {
         depthImg.draw(340, 260, 320, 240);
     }
+    
+    gui.draw();
 }
 
 //--------------------------------------------------------------

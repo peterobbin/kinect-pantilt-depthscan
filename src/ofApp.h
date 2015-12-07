@@ -3,6 +3,7 @@
 #include "ofMain.h"
 #include "ofxKinect.h"
 #include "ofxOpenCv.h"
+#include "ofxGui.h"
 
 class ofApp : public ofBaseApp{
 
@@ -44,4 +45,9 @@ class ofApp : public ofBaseApp{
     
     ofColor getPixelColor(int x, int y);
     ofColor getPixelDepth(int x, int y);
+    
+    ofxPanel gui;
+    ofParameter<int> kinectTiltAngle;
+    
+    
 };
