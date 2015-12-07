@@ -8,6 +8,7 @@ void ofApp::setup(){
     kinect.open();
     
     ofBackground(0);
+    ofSetFrameRate(60);
     
     
     // set variables
@@ -58,6 +59,10 @@ void ofApp::update(){
             depthImgPixels = frames[0];
         }
         
+        if ( !scanImgPixels.isAllocated() ) {
+            scanImgPixels = frames[0];
+        }
+        
         
         // getting color and apply
         for (int y = 0; y< imgH; y++) {
@@ -75,31 +80,50 @@ void ofApp::update(){
             }
         }
         
+        
+        // getting depth slitScan and apply
+        for (int y = 0; y< imgH; y++) {
+            for (int x = 0; x < imgW; x++) {
+                ofColor color = getPixelSlitDepthColor(x, y);
+                scanImgPixels.setColor(x, y, color);
+            }
+        }
+        
         colorImg.setFromPixels(colorImgPixels);
         depthImg.setFromPixels(depthImgPixels);
+        scanImg.setFromPixels(scanImgPixels);
+    
         
     }
     
-    kinect.setCameraTiltAngle(kinectTiltAngle);
     
+    if (previousKinectTiltAngle != kinectTiltAngle){
+        kinect.setCameraTiltAngle(kinectTiltAngle);
+    }
+    previousKinectTiltAngle = kinectTiltAngle;
     
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    //draw kinect raw image
+    // draw kinect raw image
     kinect.draw(10, 10, 320, 240);
     kinect.drawDepth(340, 10, 320, 240);
     
     
-    //draw delayed image
+    // draw delayed image
     if (colorImg.isAllocated()) {
         colorImg.draw(10, 260, 320, 240);
     }
    
-    //draw delayed depth
+    // draw delayed depth
     if (depthImg.isAllocated()) {
         depthImg.draw(340, 260, 320, 240);
+    }
+    
+    // draw scanned img
+    if (scanImg.isAllocated()) {
+        scanImg.draw(670, 260, 320, 240);
     }
     
     gui.draw();
@@ -135,6 +159,41 @@ ofColor ofApp::getPixelDepth(int x, int y){
         depth0 = depthFrames[0].getColor(x, y);
     }
     return depth0;
+}
+//--------------------------------------------------------------
+ofColor ofApp::getPixelSlitDepthColor(int x, int y){
+  
+    ofColor color0;
+    ofColor depth0;
+    int depth1;
+    int depth2;
+    depth0 = depthFrames[0].getColor(x, y);
+    depth1 = abs(depth0.getBrightness());
+    depth1 = ofMap(depth1, 0, 255, bufferSize, 0);
+    //depth1 = abs(depth1);
+    
+   // depth2 = abs(ofMap(depth1, 0, 255, bufferSize, 0));
+   
+    
+    
+
+    
+    if (depthFrames.size() < bufferSize) {
+        color0 = frames[0].getColor(x, y);
+    }else{
+        depth2 = depthFrames[depth1 - 1].getColor(x, y).getBrightness();
+        depth2 = abs(ofMap(depth2, 0, 255, bufferSize, 0));
+        
+        
+        for (int i = 0; i < bufferSize; i++) {
+            if (i == depth1) {
+                color0 = frames[i].getColor(x, y);
+            }
+        }
+    }
+        
+    
+    return color0;
 }
 
 //--------------------------------------------------------------

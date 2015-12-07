@@ -42,12 +42,17 @@ class ofApp : public ofBaseApp{
     ofPixels depthImgPixels;
     ofImage depthImg;
     
+    ofPixels scanImgPixels;
+    ofImage scanImg;
+    
     
     ofColor getPixelColor(int x, int y);
     ofColor getPixelDepth(int x, int y);
+    ofColor getPixelSlitDepthColor(int x, int y);
     
     ofxPanel gui;
     ofParameter<int> kinectTiltAngle;
+    int previousKinectTiltAngle;
     
     
 };
