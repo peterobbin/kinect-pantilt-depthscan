@@ -157,6 +157,19 @@ void ofApp::draw(){
     }
     
     depthCVImage.draw(670, 10);
+    
+    ofDrawBitmapString("raw rgb", 10, 10);
+    ofDrawBitmapString("raw depth", 340, 10);
+    ofDrawBitmapString("inpainted depth", 670, 10);
+    ofDrawBitmapString("raw delayed rgb", 10, 260);
+    ofDrawBitmapString("inpainted delayed depth", 340, 260);
+    ofDrawBitmapString("realtime slit scan", 670, 260);
+    
+    
+    
+    
+    
+    
     gui.draw();
 }
 
