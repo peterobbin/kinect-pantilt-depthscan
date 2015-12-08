@@ -4,7 +4,10 @@
 #include "ofxKinect.h"
 #include "ofxOpenCv.h"
 #include "ofxGui.h"
+#include "opencv2/opencv.hpp"
 
+#define DONW_SAMPLING_SCALE 4
+#define DEFAULT_INPAINT_RADIUS 1
 class ofApp : public ofBaseApp{
 
 	public:
@@ -49,6 +52,10 @@ class ofApp : public ofBaseApp{
     ofColor getPixelColor(int x, int y);
     ofColor getPixelDepth(int x, int y);
     ofColor getPixelSlitDepthColor(int x, int y);
+    
+    ofxCvGrayscaleImage depthCVImage;
+    ofxCvGrayscaleImage depthCVMask;
+    ofxCvGrayscaleImage depthCVInpainted;
     
     ofxPanel gui;
     ofParameter<int> kinectTiltAngle;

@@ -12,7 +12,7 @@ void ofApp::setup(){
     
     
     // set variables
-    bufferSize = 50;
+    bufferSize = 80;
     
     
     imgW = kinect.getWidth();
@@ -23,6 +23,9 @@ void ofApp::setup(){
     gui.setup();
     gui.add(kinectTiltAngle.set("Kinect Tilt Angle", 0, 0, 30));
     
+    depthCVImage.allocate(imgW, imgH);
+    depthCVMask.allocate(imgW, imgH);
+    depthCVInpainted.allocate(imgW, imgH);
 
 }
 
@@ -32,8 +35,35 @@ void ofApp::update(){
     kinect.update();
     
     if (kinect.isFrameNew()){
+        
+        // inpainting method modified and improved from Marek Berza's ofxKinectInpainter
+        depthCVImage.setFromPixels(kinect.getDepthPixels());
+        depthCVMask.setFromPixels(kinect.getDepthPixels());
+        depthCVMask.threshold(1, true);
+        depthCVMask.resize(imgW/DONW_SAMPLING_SCALE, imgH/DONW_SAMPLING_SCALE);
+        depthCVImage.resize(imgW/DONW_SAMPLING_SCALE, imgH/DONW_SAMPLING_SCALE);
+        depthCVInpainted.resize(imgW/DONW_SAMPLING_SCALE, imgH/DONW_SAMPLING_SCALE);
+        
+        
+        cv::Mat img0 = depthCVImage.getCvImage();
+        cv::Mat src = depthCVImage.getCvImage();
+        cv::Mat mask = depthCVMask.getCvImage();
+        cv::inpaint(src, mask, img0, DEFAULT_INPAINT_RADIUS, cv::INPAINT_TELEA);
+        
+
+        depthCVInpainted.scaleIntoMe(depthCVImage, CV_INTER_LINEAR);
+        cvCopy(depthCVInpainted.getCvImage(), depthCVImage.getCvImage(), depthCVMask.getCvImage());
+        
+        depthCVImage.flagImageChanged();
+        depthCVImage.resize(imgW, imgH);
+        
+        ofPixels depth0 = depthCVImage.getPixels();
+        depthCVImage.resize(imgW /2, imgH/2);
+        
         frames.push_front(kinect.getPixels());
-        depthFrames.push_front(kinect.getDepthPixels());
+        depthFrames.push_front(depth0);
+        
+        
         
         if(frames.size() > bufferSize){
             frames.pop_back();
@@ -126,6 +156,7 @@ void ofApp::draw(){
         scanImg.draw(670, 260, 320, 240);
     }
     
+    depthCVImage.draw(670, 10);
     gui.draw();
 }
 
@@ -174,7 +205,7 @@ ofColor ofApp::getPixelSlitDepthColor(int x, int y){
     
     if (depthFrames.size() < bufferSize) {
         color0 = frames[0].getColor(x, y);
-    }else{   
+    }else{
         for (int i = 0; i < bufferSize; i++) {
             if (i == depth1) {
                 color0 = frames[i].getColor(x, y);
