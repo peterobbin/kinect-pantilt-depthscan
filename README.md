@@ -1,5 +1,4 @@
 # Pan-Tilt Controlled Kinect Slit Scan
-![depthscan](http://payload425.cargocollective.com/1/14/460423/10800519/depthscan.gif)
 The goal of this project is to make a pan tilt controllable Kinect installation that fits the need of my thesis.
 
 ## Progress
