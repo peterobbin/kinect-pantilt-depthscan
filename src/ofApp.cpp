@@ -170,21 +170,11 @@ ofColor ofApp::getPixelSlitDepthColor(int x, int y){
     depth0 = depthFrames[0].getColor(x, y);
     depth1 = abs(depth0.getBrightness());
     depth1 = ofMap(depth1, 0, 255, bufferSize, 0);
-    //depth1 = abs(depth1);
-    
-   // depth2 = abs(ofMap(depth1, 0, 255, bufferSize, 0));
-   
-    
-    
 
     
     if (depthFrames.size() < bufferSize) {
         color0 = frames[0].getColor(x, y);
-    }else{
-        depth2 = depthFrames[depth1 - 1].getColor(x, y).getBrightness();
-        depth2 = abs(ofMap(depth2, 0, 255, bufferSize, 0));
-        
-        
+    }else{   
         for (int i = 0; i < bufferSize; i++) {
             if (i == depth1) {
                 color0 = frames[i].getColor(x, y);
