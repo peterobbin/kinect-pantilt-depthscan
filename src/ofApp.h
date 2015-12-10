@@ -28,12 +28,12 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
     
-    
+    void kinectInpaint();
     
     int bufferSize;
     int imgW;
     int imgH;
-    
+    bool focusResult;
     
     ofxKinect kinect;
     deque<ofPixels> frames;

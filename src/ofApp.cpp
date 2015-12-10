@@ -36,34 +36,7 @@ void ofApp::update(){
     
     if (kinect.isFrameNew()){
         
-        // inpainting method modified and improved from Marek Berza's ofxKinectInpainter
-        depthCVImage.setFromPixels(kinect.getDepthPixels());
-        depthCVMask.setFromPixels(kinect.getDepthPixels());
-        depthCVMask.threshold(1, true);
-        depthCVMask.resize(imgW/DONW_SAMPLING_SCALE, imgH/DONW_SAMPLING_SCALE);
-        depthCVImage.resize(imgW/DONW_SAMPLING_SCALE, imgH/DONW_SAMPLING_SCALE);
-        depthCVInpainted.resize(imgW/DONW_SAMPLING_SCALE, imgH/DONW_SAMPLING_SCALE);
-        
-        
-        cv::Mat img0 = depthCVImage.getCvImage();
-        cv::Mat src = depthCVImage.getCvImage();
-        cv::Mat mask = depthCVMask.getCvImage();
-        cv::inpaint(src, mask, img0, DEFAULT_INPAINT_RADIUS, cv::INPAINT_TELEA);
-        
-
-        depthCVInpainted.scaleIntoMe(depthCVImage, CV_INTER_LINEAR);
-        cvCopy(depthCVInpainted.getCvImage(), depthCVImage.getCvImage(), depthCVMask.getCvImage());
-        
-        depthCVImage.flagImageChanged();
-        depthCVImage.resize(imgW, imgH);
-        
-        ofPixels depth0 = depthCVImage.getPixels();
-        depthCVImage.resize(imgW /2, imgH/2);
-        
-        frames.push_front(kinect.getPixels());
-        depthFrames.push_front(depth0);
-        
-        
+        kinectInpaint();
         
         if(frames.size() > bufferSize){
             frames.pop_back();
@@ -136,41 +109,78 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    // draw kinect raw image
-    kinect.draw(10, 10, 320, 240);
-    kinect.drawDepth(340, 10, 320, 240);
     
+    if (!focusResult){
+        // draw kinect raw image
+        kinect.draw(10, 10, 320, 240);
+        kinect.drawDepth(340, 10, 320, 240);
+        
+        
+        // draw delayed image
+        if (colorImg.isAllocated()) {
+            colorImg.draw(10, 260, 320, 240);
+        }
+        
+        // draw delayed depth
+        if (depthImg.isAllocated()) {
+            depthImg.draw(340, 260, 320, 240);
+        }
+        
+        // draw scanned img
+        if (scanImg.isAllocated()) {
+            scanImg.draw(670, 260, 320, 240);
+        }
+        
+        depthCVImage.draw(670, 10);
+        
+        ofDrawBitmapString("raw rgb", 10, 10);
+        ofDrawBitmapString("raw depth", 340, 10);
+        ofDrawBitmapString("inpainted depth", 670, 10);
+        ofDrawBitmapString("raw delayed rgb", 10, 260);
+        ofDrawBitmapString("inpainted delayed depth", 340, 260);
+        ofDrawBitmapString("realtime slit scan", 670, 260);
     
-    // draw delayed image
-    if (colorImg.isAllocated()) {
-        colorImg.draw(10, 260, 320, 240);
+    }else{
+        scanImg.draw(0, 0, 1024, 768);
     }
-   
-    // draw delayed depth
-    if (depthImg.isAllocated()) {
-        depthImg.draw(340, 260, 320, 240);
-    }
-    
-    // draw scanned img
-    if (scanImg.isAllocated()) {
-        scanImg.draw(670, 260, 320, 240);
-    }
-    
-    depthCVImage.draw(670, 10);
-    
-    ofDrawBitmapString("raw rgb", 10, 10);
-    ofDrawBitmapString("raw depth", 340, 10);
-    ofDrawBitmapString("inpainted depth", 670, 10);
-    ofDrawBitmapString("raw delayed rgb", 10, 260);
-    ofDrawBitmapString("inpainted delayed depth", 340, 260);
-    ofDrawBitmapString("realtime slit scan", 670, 260);
-    
     
     
     
     
     
     gui.draw();
+}
+
+//--------------------------------------------------------------
+void ofApp::kinectInpaint(){
+    // inpainting method modified and improved from Marek Berza's ofxKinectInpainter
+    depthCVImage.setFromPixels(kinect.getDepthPixels());
+    depthCVMask.setFromPixels(kinect.getDepthPixels());
+    depthCVMask.threshold(1, true);
+    depthCVMask.resize(imgW/DONW_SAMPLING_SCALE, imgH/DONW_SAMPLING_SCALE);
+    depthCVImage.resize(imgW/DONW_SAMPLING_SCALE, imgH/DONW_SAMPLING_SCALE);
+    depthCVInpainted.resize(imgW/DONW_SAMPLING_SCALE, imgH/DONW_SAMPLING_SCALE);
+    
+    
+    cv::Mat img0 = depthCVImage.getCvImage();
+    cv::Mat src = depthCVImage.getCvImage();
+    cv::Mat mask = depthCVMask.getCvImage();
+    cv::inpaint(src, mask, img0, DEFAULT_INPAINT_RADIUS, cv::INPAINT_TELEA);
+    
+    
+    depthCVInpainted.scaleIntoMe(depthCVImage, CV_INTER_LINEAR);
+    cvCopy(depthCVInpainted.getCvImage(), depthCVImage.getCvImage(), depthCVMask.getCvImage());
+    
+    depthCVImage.flagImageChanged();
+    depthCVImage.resize(imgW, imgH);
+    
+    ofPixels depth0 = depthCVImage.getPixels();
+    depthCVImage.resize(imgW /2, imgH/2);
+    
+    frames.push_front(kinect.getPixels());
+    depthFrames.push_front(depth0);
+    
+
 }
 
 //--------------------------------------------------------------
@@ -232,6 +242,11 @@ ofColor ofApp::getPixelSlitDepthColor(int x, int y){
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
+    switch(key){
+        case ' ':
+            focusResult = !focusResult;
+        break;
+    }
 
 }
 
