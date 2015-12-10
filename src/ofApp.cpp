@@ -26,7 +26,35 @@ void ofApp::setup(){
     depthCVImage.allocate(imgW, imgH);
     depthCVMask.allocate(imgW, imgH);
     depthCVInpainted.allocate(imgW, imgH);
+    
+    // firmata arduino connection
+    ard.connect("/dev/cu.usbserial-DA00VVWF", 57600);
+    
+    ofAddListener(ard.EInitialized, this, &ofApp::setupArduino);
+    bSetupArduino	= false;
+    
+    horizonalAngle = 90;
+    verticalAngle = 95;
 
+}
+//--------------------------------------------------------------
+void ofApp::setupArduino(const int & version) {
+    
+    // remove listener because we don't need it anymore
+    ofRemoveListener(ard.EInitialized, this, &ofApp::setupArduino);
+    
+    // it is now safe to send commands to the Arduino
+    bSetupArduino = true;
+    
+    // print firmware name and version to the console
+    ofLogNotice() << ard.getFirmwareName();
+    ofLogNotice() << "firmata v" << ard.getMajorFirmwareVersion() << "." << ard.getMinorFirmwareVersion();
+    
+    
+    ard.sendServoAttach(9);
+    ard.sendServoAttach(10);
+    
+    
 }
 
 //--------------------------------------------------------------
@@ -46,6 +74,9 @@ void ofApp::update(){
             depthFrames.pop_back();
         }
     }
+    
+    // update arduino
+    updateArduino();
     
 
     
@@ -108,6 +139,12 @@ void ofApp::update(){
 }
 
 //--------------------------------------------------------------
+void ofApp::updateArduino(){
+    ard.update();
+}
+
+
+//--------------------------------------------------------------
 void ofApp::draw(){
     
     if (!focusResult){
@@ -144,6 +181,12 @@ void ofApp::draw(){
         scanImg.draw(0, 0, 1024, 768);
     }
     
+    ofSetColor(255, 255, 255);
+    if (!bSetupArduino){
+        ofDrawBitmapString("arduino not ready...\n", 525, 40);
+    } else {
+        ofDrawBitmapString("arduino ready \n", 525, 40);
+    }
     
     
     
@@ -246,6 +289,47 @@ void ofApp::keyPressed(int key){
         case ' ':
             focusResult = !focusResult;
         break;
+        case OF_KEY_RIGHT:
+            // rotate servo head to 180 degrees
+            if (horizonalAngle < 180) {
+                horizonalAngle ++;
+            }
+            ard.sendServo(9, horizonalAngle, false);
+        break;
+        case OF_KEY_LEFT:
+            // rotate servo head to 0 degrees
+            if (horizonalAngle > 0) {
+                horizonalAngle --;
+            }
+            ard.sendServo(9, horizonalAngle, false);
+            
+        break;
+        case OF_KEY_DOWN:
+            // rotate servo head to 0 degrees
+            if (verticalAngle < 99) {
+                verticalAngle ++;
+            }
+            ard.sendServo(10, verticalAngle, false);
+            
+        break;
+        case OF_KEY_UP:
+            // rotate servo head to 0 degrees
+            if (verticalAngle > 85) {
+                verticalAngle --;
+            }
+            ard.sendServo(10, verticalAngle, false);
+        
+        break;
+        case 'r':
+            horizonalAngle = 90;
+            verticalAngle = 98;
+            
+            ard.sendServo(9, horizonalAngle, false);
+            ard.sendServo(10, verticalAngle, false);
+            
+            break;
+        default:
+            break;
     }
 
 }

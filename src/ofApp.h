@@ -62,4 +62,16 @@ class ofApp : public ofBaseApp{
     int previousKinectTiltAngle;
     
     
+    
+    ofArduino	ard;
+    bool		bSetupArduino;			// flag variable for setting up arduino once
+    
+private:
+    
+    void setupArduino(const int & version);
+    void updateArduino();
+    
+    int horizonalAngle;
+    int verticalAngle;
+    
 };
