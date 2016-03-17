@@ -8,11 +8,11 @@ void ofApp::setup(){
     kinect.open();
     
     ofBackground(0);
-    ofSetFrameRate(60);
+    ofSetFrameRate(255);
     
     
     // set variables
-    bufferSize = 80;
+    bufferSize = 256;
     
     
     imgW = kinect.getWidth();
@@ -217,7 +217,12 @@ void ofApp::kinectInpaint(){
     depthCVImage.flagImageChanged();
     depthCVImage.resize(imgW, imgH);
     
+    //  this line to replace depth image with inpainted one
     ofPixels depth0 = depthCVImage.getPixels();
+    
+    //  or getting original
+    //ofPixels depth0 = kinect.getPixels();
+    
     depthCVImage.resize(imgW /2, imgH/2);
     
     frames.push_front(kinect.getPixels());
@@ -228,7 +233,7 @@ void ofApp::kinectInpaint(){
 
 //--------------------------------------------------------------
 void ofApp::exit() {
-    // close and reset kinect
+    //  close and reset kinect
     kinect.setCameraTiltAngle(0);
     kinect.close();
 
@@ -266,6 +271,9 @@ ofColor ofApp::getPixelSlitDepthColor(int x, int y){
     int depth2;
     depth0 = depthFrames[0].getColor(x, y);
     depth1 = abs(depth0.getBrightness());
+    // mapping depth to actual buffersize
+    // reverse to change refresh order
+    //depth1 = ofMap(depth1, 0, 255, 0, bufferSize);
     depth1 = ofMap(depth1, 0, 255, bufferSize, 0);
 
     
