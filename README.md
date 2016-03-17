@@ -11,6 +11,6 @@ The goal of this project is to make a pan tilt controllable Kinect installation 
 ## TODO
 - Connected to Arduino controlled pan tilt mount for Kinect.
 - Performance
-- Improve Inpainting Algorithm to reduce artifacts 
+- Improve inpainting algorithm to reduce artifacts 
 
 
